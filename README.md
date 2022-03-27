@@ -1,4 +1,4 @@
-# SSV Network Project
+# SSV Contracts Project
 
 This repository contains a sample project that you can use as the starting point
 for Ethereum project. It's also a great fit for learning the basics of
@@ -18,8 +18,8 @@ The first things you need to do are cloning this repository and installing its
 dependencies:
 
 ```sh
-git clone git@github.com:bloxapp/ssv-network.git
-cd ssv-network
+git clone git@github.com:bloxapp/ssv-contracts.git
+cd ssv-contracts
 npm install
 ```
 
@@ -33,8 +33,8 @@ npx hardhat node
 For more details about it and how to use MainNet forking you can find [here](https://hardhat.org/hardhat-network/).
 
 ### Compile contracts
-Take a look at `contracts/` folder, you should be able to find `SSVNetwork.sol`, `SSVNetworkV2.sol` as simple contract example.
-To compile it, simply run:
+Contracts are at `contracts/` folder,
+To compile them, simply run:
 
 ```sh
 npx hardhat compile
@@ -87,7 +87,7 @@ To be sure that values are correct and click `Save` button. As result on ethersc
 `Write as Proxy` and `Read as Proxy` which will represent implementation smart contract functions interface and the actual state.
 
 ### Step 5: Upgrade contract
-Once we have tested our new implementation, for example `contracts/SSVNetworkV2.sol` we can prepare the upgrade.
+Once we have tested our new implementation, for example `contracts/DEX.sol` we can prepare the upgrade.
 This will validate and deploy our new implementation contract.
 Note: For testnet and mainnet  we will use Openzeppelin Defender to manage our upgrades and Gnosis Safe for mainnet safe signiture process.
 
@@ -167,29 +167,3 @@ Full audit report [CoinFabrik Report](./docs/SSV_Token_Dex&Vesting_audit.pdf)
   followed by `Settings > Advanced > Reset Account`.
 
 **Happy _buidling_!**
-
-## Functionality
-
-### Add new operator function
-```sh
-  /**
-   * @dev Add new operator to the list.
-   * @param _name Opeator's display name.
-   * @param _pubkey Operator's Public Key. Will be used to encrypt secret shares of validators keys.
-   * @param _paymentAddress Operator's ethereum address that can collect fees.
-   */
-  function addOperator(string memory _name, string _pubkey, address _paymentAddress) public {
-```
-It stores operator data with unque `_pubkey` validation into a blockchain storage.
-
-### Fire event when operator is added
-```sh
-  /**
-   * @dev Emitted when the operator has been added.
-   * @param name Opeator's display name.
-   * @param pubkey Operator's Public Key. Will be used to encrypt secret shares of validators keys.
-   * @param paymentAddress Operator's ethereum address that can collect fees.
-   */
-  event OperatorAdded(string name, string pubkey, address paymentAddress);
-```
-It emits the event each time when new operator is added.
