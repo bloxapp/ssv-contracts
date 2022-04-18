@@ -2,6 +2,7 @@ import { ethers } from 'hardhat';
 const fs = require('fs');
 import { parse } from 'csv-parse';
 import { parseBalanceMap } from './merkl-tree/parse-balance-map';
+import { utils } from "ethers";
 
 async function fetchRewards() {
   const rewardsFile = `${__dirname}/rewards.csv`;
@@ -10,10 +11,9 @@ async function fetchRewards() {
   const rewardsParser = fs.createReadStream(rewardsFile).pipe(parse({ columns: true }));
 
   for await (const record of rewardsParser) {
-    const amount = +`${record.amount}000000000000000000`;
     rewards.push({
       address: record.address,
-      earnings: `0x${(amount).toString(16)}`,
+      earnings: utils.parseEther(record.amount).toHexString(),
       reasons: record.reasons || ''
     });
   }
@@ -25,7 +25,7 @@ async function main() {
   const result = parseBalanceMap(rewards);
   await fs.promises.writeFile('result.json', JSON.stringify(result, null, 4));
   const MerkleDistributorFactory = await ethers.getContractFactory('MerkleDistributor');
-  const contract = await MerkleDistributorFactory.deploy(process.env.SSV_TOKEN_ADDRESS, result.merkleRoot, process.env.TREASURE_ADDRESS);
+  const contract = await MerkleDistributorFactory.deploy(process.env.SSV_TOKEN_ADDRESS, result.merkleRoot, process.env.TREASURY_ADDRESS);
   console.log('MerkleDistributor deployed to:', contract.address);
 }
 

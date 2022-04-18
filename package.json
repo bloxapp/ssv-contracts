@@ -28,6 +28,7 @@
   "dependencies": {
     "cli-table": "^0.3.6",
     "consola": "^2.15.3",
+    "csv-parse": "^5.0.4",
     "pg": "^8.7.1"
   }
 }
