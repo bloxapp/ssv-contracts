@@ -11,13 +11,13 @@ before(() => {
 
 const { expect } = chai
 
-let treasury, ssvToken, merkleDistributor, distributionDataJSON
+let treasury, fakeAccount, ssvToken, merkleDistributor, distributionDataJSON
 let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim
 
 describe('Distribution', function () {
   before(async function () {
     // Create treasury wallet
-    [treasury] = await ethers.getSigners()
+    [treasury, fakeAccount] = await ethers.getSigners()
     // Get the JSON data from result.json in scripts folder
     distributionDataJSON = await JSON.parse(await fs.readFileSync(`./scripts/result.json`))
     // Initialize contracts
@@ -81,6 +81,8 @@ describe('Distribution', function () {
   })
 
   it('Close Air Drop', async function () {
+    // Close air drop with incorreect address
+    await merkleDistributor.connect(fakeAccount).endAirdrop().should.be.rejectedWith('Not initiated by treasury.')
     // Close air drop and make sure remaining balance has transferred to the treasury and distribution contract is empty
     await merkleDistributor.connect(treasury).endAirdrop()
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(treasury.address))).to.equal('5963.632583')
