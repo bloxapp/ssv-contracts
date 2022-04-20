@@ -13,6 +13,7 @@ const { expect } = chai
 
 let treasury, fakeAccount, ssvToken, merkleDistributor, distributionDataJSON
 let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim
+let distributionDataObject = {}
 
 describe('Distribution', function () {
   before(async function () {
@@ -44,11 +45,11 @@ describe('Distribution', function () {
       for (let j = 0; j < headers.length; j++) tempObj[headers[j]] = currentline[j]
       distributionData.push(tempObj)
     }
-    let distributionDataObject = {}
     for (let i = 0; i < distributionData.length; i++) distributionDataObject[(distributionData[i].address.replace(/(\r\n|\n|\r)/gm, "")).toUpperCase()] = distributionData[i].amount
     // Mint tokens
     await ssvToken.mint(merkleDistributor.address, distributionDataJSON.tokenTotal)
     // Do a claim from all addresses except one and make sure the claimed wallet matches amount in csv file
+    let totalTokenAmount = 0
     for (const address in distributionDataJSON.claims) {
       const addressData = distributionDataJSON.claims[address]
       if (addressData.index !== 3845) {
@@ -56,10 +57,12 @@ describe('Distribution', function () {
         await merkleDistributor.claim(addressData.index, address, addressData.amount, addressData.proof)
         expect(ethers.utils.formatEther(await ssvToken.balanceOf(address))).to.equal(String(distributionDataObject[address.toUpperCase()]))
       } else { noClaimAddress = address }
+      totalTokenAmount += Number(ethers.utils.formatEther(addressData.amount))
     }
+    expect(totalTokenAmount).to.equal(ethers.utils.formatEther(distributionDataJSON.tokenTotal))
     // Expect distribution contract to have certain amount of SSV left
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(noClaimAddress))).to.equal('0.0')
-    expect(ethers.utils.formatEther(await ssvToken.balanceOf(merkleDistributor.address))).to.equal('5963.632583')
+    expect(ethers.utils.formatEther(await ssvToken.balanceOf(merkleDistributor.address))).to.equal(String(distributionDataObject[noClaimAddress.toUpperCase()]))
   })
 
   it('Double Claim', async function () {
@@ -85,7 +88,7 @@ describe('Distribution', function () {
     await merkleDistributor.connect(fakeAccount).endAirdrop().should.be.rejectedWith('Not initiated by treasury.')
     // Close air drop and make sure remaining balance has transferred to the treasury and distribution contract is empty
     await merkleDistributor.connect(treasury).endAirdrop()
-    expect(ethers.utils.formatEther(await ssvToken.balanceOf(treasury.address))).to.equal('5963.632583')
+    expect(ethers.utils.formatEther(await ssvToken.balanceOf(treasury.address))).to.equal(String(distributionDataObject[noClaimAddress.toUpperCase()]))
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(merkleDistributor.address))).to.equal('0.0')
   })
 
