@@ -35,7 +35,7 @@ describe('Distribution', function () {
   })
 
   it('Claim all tokens', async function () {
-    this.timeout(40000) // needed to exted the 20 second mocha timeout
+    this.timeout(40000) // needed to extend the 20 second mocha timeout
     // Get rewards csv data from scripts folder and parse to JSON
     const distributionDataCSV = await fs.readFileSync(`./scripts/rewards.csv`)
     const linesCSV = distributionDataCSV.toString().split('\r')
