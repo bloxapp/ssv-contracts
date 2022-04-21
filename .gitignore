@@ -15,3 +15,4 @@ subgraph/build
 /incentivized_testnet/prod
 /incentivized_testnet/stage
 /incentivized_testnet/latest_metrics.json
+.DS_Store

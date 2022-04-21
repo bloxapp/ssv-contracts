@@ -5,7 +5,7 @@ import { parseBalanceMap } from './merkl-tree/parse-balance-map';
 import { utils } from "ethers";
 
 async function fetchRewards() {
-  const rewardsFile = `${__dirname}/rewards-example.csv`;
+  const rewardsFile = `${__dirname}/csv_rewards.csv`;
 
   const rewards = [] as any;
   const rewardsParser = fs.createReadStream(rewardsFile).pipe(parse({ columns: true }));
