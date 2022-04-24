@@ -21,23 +21,29 @@ describe('Distribution', function () {
   before(async function () {
     // Create treasury and fake account wallets
     [treasury, fakeAccount] = await ethers.getSigners()
-    // Get the JSON data from result.json in scripts folder
-    distributionDataJSON = await JSON.parse(await fs.readFileSync(`./scripts/result.json`))
+
+    // Get the JSON data from resultFake.json in scripts folder
+    distributionDataJSON = await JSON.parse(await fs.readFileSync(`./scripts/resultFake.json`))
+
     // Initialize contracts
     const ssvTokenFactory = await ethers.getContractFactory('SSVToken')
     const merkleDistributorFactory = await ethers.getContractFactory('MerkleDistributor')
+
     // Deploy contracts
     ssvToken = await ssvTokenFactory.deploy()
     merkleDistributor = await merkleDistributorFactory.deploy(ssvToken.address, distributionDataJSON.merkleRoot, treasury.address)
+
     // Wait for contract deployment to finish
     await ssvToken.deployed()
     await merkleDistributor.deployed()
   })
 
   it('Claim all tokens', async function () {
-    this.timeout(40000) // needed to extend the 20 second mocha timeout
+    // Needed to extend the 20 second mocha timeout
+    this.timeout(40000)
+
     // Get rewards csv data from scripts folder and parse to JSON
-    const distributionDataCSV = await fs.readFileSync(`./scripts/rewards.csv`)
+    const distributionDataCSV = await fs.readFileSync(`./scripts/rewardsFake.csv`)
     const linesCSV = distributionDataCSV.toString().split('\r')
     let distributionData = []
     const headers = linesCSV[0].split(',')
@@ -48,10 +54,11 @@ describe('Distribution', function () {
       distributionData.push(tempObj)
     }
     for (let i = 0; i < distributionData.length; i++) distributionDataObject[(distributionData[i].address.replace(/\n/, '')).toUpperCase()] = distributionData[i].amount
+
     // Mint tokens
     await ssvToken.mint(merkleDistributor.address, distributionDataJSON.tokenTotal)
-    // Do a claim from all addresses except one and make sure the claimed wallet matches amount in csv file
-    let totalTokenAmount = 0
+
+    // Do a claim from all addresses except one and make sure the claimed wallet matches amounts in the csv file
     for (const address in distributionDataJSON.claims) {
       const addressData = distributionDataJSON.claims[address]
       if (addressData.index !== noClaimIndex) {
@@ -59,19 +66,15 @@ describe('Distribution', function () {
         await merkleDistributor.claim(addressData.index, address, addressData.amount, addressData.proof)
         expect(ethers.utils.formatEther(await ssvToken.balanceOf(address))).to.equal(String(distributionDataObject[address.toUpperCase()]))
       } else noClaimAddress = address
-      totalTokenAmount += Number(ethers.utils.formatEther(addressData.amount))
     }
 
-    // Expect that all individual token amounts adds up to total token amount in merkle tree (BUG doesnt add up correctly)
-    // expect(totalTokenAmount).to.equal(ethers.utils.formatEther(distributionDataJSON.tokenTotal))
-
-    // Expect distribution contract to have certain amount of SSV left
+    // Expect distribution contract to have a certain amount of SSV left
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(noClaimAddress))).to.equal('0.0')
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(merkleDistributor.address))).to.equal(String(distributionDataObject[noClaimAddress.toUpperCase()]))
   })
 
   it('Double Claim', async function () {
-    // Try to claim from address that has already claimed
+    // Try to claim from an address that has already claimed
     addressData = distributionDataJSON.claims[doubleClaimAddress]
     await merkleDistributor.claim(addressData.index, doubleClaimAddress, addressData.amount, addressData.proof).should.be.rejectedWith('Drop already claimed.')
     expect(await merkleDistributor.isClaimed(noClaimIndex)).to.equal(false)
@@ -81,16 +84,19 @@ describe('Distribution', function () {
   it('Invalid Claims', async function () {
     addressDataNoClaim = distributionDataJSON.claims[noClaimAddress]
     // Invalid address
-    await merkleDistributor.claim(addressDataNoClaim.index, treasury.address, addressDataNoClaim.amount, addressDataNoClaim.proof).should.be.rejectedWith('Invalid proof.')
+    await merkleDistributor.claim(addressDataNoClaim.index, fakeAccount.address, addressDataNoClaim.amount, addressDataNoClaim.proof).should.be.rejectedWith('Invalid proof.')
+
     // Invalid amount
     await merkleDistributor.claim(addressDataNoClaim.index, noClaimAddress, addressData.amount, addressDataNoClaim.proof).should.be.rejectedWith('Invalid proof.')
+
     // Invalid proof
     await merkleDistributor.claim(addressDataNoClaim.index, noClaimAddress, addressDataNoClaim.amount, addressData.proof).should.be.rejectedWith('Invalid proof.')
   })
 
   it('Close Air Drop', async function () {
-    // Close air drop with incorreect treasury address
+    // Close air drop with an incorreect treasury address
     await merkleDistributor.connect(fakeAccount).endAirdrop().should.be.rejectedWith('Not initiated by treasury.')
+
     // Close air drop and make sure remaining balance has transferred to the treasury and distribution contract is empty
     await merkleDistributor.connect(treasury).endAirdrop()
     expect(ethers.utils.formatEther(await ssvToken.balanceOf(treasury.address))).to.equal(String(distributionDataObject[noClaimAddress.toUpperCase()]))
@@ -98,9 +104,10 @@ describe('Distribution', function () {
   })
 
   it('Claim After Air Drop Close', async function () {
-    // Claim from account that did not claim yet after close
+    // Claim from account that did not claim yet after air drop closed
     await merkleDistributor.claim(addressDataNoClaim.index, noClaimAddress, addressDataNoClaim.amount, addressDataNoClaim.proof).should.be.rejectedWith('transfer amount exceeds balance')
-    // Claim from account that did claim already after close
+
+    // Claim from account that did claim already after air drop closed
     await merkleDistributor.claim(addressData.index, doubleClaimAddress, addressData.amount, addressData.proof).should.be.rejectedWith('Drop already claimed.')
   })
 })
