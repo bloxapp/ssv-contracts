@@ -5,6 +5,8 @@ import { ethers } from 'hardhat'
 const fs = require('fs')
 import * as chai from 'chai'
 import * as chaiAsPromised from 'chai-as-promised'
+import { parse } from 'csv-parse';
+
 before(() => {
   chai.should()
   chai.use(chaiAsPromised)
@@ -15,7 +17,7 @@ const { expect } = chai
 let treasury, fakeAccount, ssvToken, merkleDistributor, distributionDataJSON
 let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim
 let distributionDataObject = {}
-const noClaimIndex = 3845
+const noClaimIndex = 4
 
 describe('Distribution', function () {
   before(async function () {
@@ -39,21 +41,10 @@ describe('Distribution', function () {
   })
 
   it('Claim all tokens', async function () {
-    // Needed to extend the 20 second mocha timeout
-    this.timeout(40000)
 
     // Get rewards csv data from scripts folder and parse to JSON
-    const distributionDataCSV = await fs.readFileSync(`./scripts/rewardsFake.csv`)
-    const linesCSV = distributionDataCSV.toString().split('\r')
-    let distributionData = []
-    const headers = linesCSV[0].split(',')
-    for (let i = 1; i < linesCSV.length; i++) {
-      let tempObj = {}
-      const currentline = linesCSV[i].split(',')
-      for (let j = 0; j < headers.length; j++) tempObj[headers[j]] = currentline[j]
-      distributionData.push(tempObj)
-    }
-    for (let i = 0; i < distributionData.length; i++) distributionDataObject[(distributionData[i].address.replace(/\n/, '')).toUpperCase()] = distributionData[i].amount
+    const distributionData = fs.createReadStream(`./scripts/rewardsFake.csv`).pipe(parse({ columns: true }));
+    for await (const record of distributionData) { distributionDataObject[(record.address.replace(/\n/, '')).toUpperCase()] = record.amount }
 
     // Mint tokens
     await ssvToken.mint(merkleDistributor.address, distributionDataJSON.tokenTotal)
