@@ -15,9 +15,8 @@ const { expect } = chai
 
 // Declare global variables
 let treasury, fakeAccount, ssvToken, merkleDistributor, distributionDataJSON
-let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim
+let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim, noClaimIndex
 let distributionDataObject = {}
-const noClaimIndex = 4
 
 describe('Distribution: IO1-77', function () {
   before(async function () {
@@ -26,6 +25,9 @@ describe('Distribution: IO1-77', function () {
 
     // Get the JSON data from resultFake.json in scripts folder
     distributionDataJSON = await JSON.parse(await fs.readFileSync(`./scripts/resultFake.json`))
+    
+    // Define no claim index
+    noClaimIndex = (Object.keys(distributionDataJSON.claims).length) - 1
 
     // Initialize contracts
     const ssvTokenFactory = await ethers.getContractFactory('SSVToken')
