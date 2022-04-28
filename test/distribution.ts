@@ -19,7 +19,7 @@ let doubleClaimAddress, noClaimAddress, addressData, addressDataNoClaim
 let distributionDataObject = {}
 const noClaimIndex = 4
 
-describe('Distribution', function () {
+describe('Distribution: IO1-77', function () {
   before(async function () {
     // Create treasury and fake account wallets
     [treasury, fakeAccount] = await ethers.getSigners()
