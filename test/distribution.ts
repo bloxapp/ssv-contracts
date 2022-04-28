@@ -43,7 +43,6 @@ describe('Distribution: IO1-77', function () {
   })
 
   it('Claim all tokens', async function () {
-
     // Get rewards csv data from scripts folder and parse to JSON
     const distributionData = fs.createReadStream(`./scripts/rewardsFake.csv`).pipe(parse({ columns: true }));
     for await (const record of distributionData) { distributionDataObject[(record.address.replace(/\n/, '')).toUpperCase()] = record.amount }
@@ -75,7 +74,9 @@ describe('Distribution: IO1-77', function () {
   })
 
   it('Invalid Claims', async function () {
+    // Define no claim data
     addressDataNoClaim = distributionDataJSON.claims[noClaimAddress]
+    
     // Invalid address
     await merkleDistributor.claim(addressDataNoClaim.index, fakeAccount.address, addressDataNoClaim.amount, addressDataNoClaim.proof).should.be.rejectedWith('Invalid proof.')
 
