@@ -11,6 +11,9 @@ import 'solidity-coverage';
 import '@nomiclabs/hardhat-solhint';
 
 const config: HardhatUserConfig = {
+  mocha: {
+    timeout: 400000000000000
+  },
   // Your type-safe config goes here
   solidity: {
     compilers: [
