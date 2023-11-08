@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const axios = require('axios');
 const solc = require('solc');
 const { ethers } = require('ethers');
 const program = require('commander');
@@ -11,8 +10,11 @@ const INTERFACE_URL = "https://raw.githubusercontent.com/1inch/merkle-distributi
 const CONTRACT_NAME = 'CumulativeMerkleDrop';
 
 async function fetchContentFromURL(url) {
-    const response = await axios.get(url);
-    return response.data;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.text();
 }
 
 async function compileContract(contractContent, interfaceContent) {

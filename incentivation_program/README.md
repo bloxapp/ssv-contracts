@@ -35,7 +35,6 @@ Options:
 The script fetches and compiles the 1inch [CumulativeMerkleDrop]((https://github.com/1inch/merkle-distribution/blob/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896/contracts/CumulativeMerkleDrop.sol)) contract at this specific [commit](https://github.com/1inch/merkle-distribution/tree/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896) and its associated interface [ICumulativeMerkleDrop](https://github.com/1inch/merkle-distribution/blob/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896/contracts/interfaces/ICumulativeMerkleDrop.sol) from the 1inch merkle-distribution GitHub repository. The contract is then deployed to the specified Ethereum network using the provided private key.
 
 ## Dependencies
-* axios: For fetching contract content from GitHub.
 * solc: Solidity compiler for compiling the contract.
 * ethers: Ethereum library for contract deployment and interaction.
 * commander: For parsing command-line arguments.
