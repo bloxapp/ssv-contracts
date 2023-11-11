@@ -21,7 +21,7 @@ npm install
 To deploy the contract, run:
 
 ```bash
-npm run deploy-ssv-distributor -- -k [OWNER_PRIVATE_KEY] -u [PROVIDER_URL] -t [SSV_TOKEN_ADDRESS]
+npm run start -- -k [OWNER_PRIVATE_KEY] -u [PROVIDER_URL] -t [SSV_TOKEN_ADDRESS]
 ```
 
 Replace [OWNER_PRIVATE_KEY], [PROVIDER_URL], and [SSV_TOKEN_ADDRESS] with the private key of owner of the contract, provider URL, and the SSV token address, respectively.
@@ -34,6 +34,9 @@ Options:
 ## Contract Details
 The script fetches and compiles the 1inch [CumulativeMerkleDrop]((https://github.com/1inch/merkle-distribution/blob/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896/contracts/CumulativeMerkleDrop.sol)) contract at this specific [commit](https://github.com/1inch/merkle-distribution/tree/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896) and its associated interface [ICumulativeMerkleDrop](https://github.com/1inch/merkle-distribution/blob/1f8b2a6ed27d1b2d18cf8475e42eece60f41c896/contracts/interfaces/ICumulativeMerkleDrop.sol) from the 1inch merkle-distribution GitHub repository. The contract is then deployed to the specified Ethereum network using the provided private key.
 
+## Verification on etherscan
+The file `solc-input-cumulativemerkledrop.json` contains the input to submit the verification to Etherscan, using solidity input file method.
+
 ## Dependencies
 * solc: Solidity compiler for compiling the contract.
 * ethers: Ethereum library for contract deployment and interaction.
@@ -42,6 +45,5 @@ The script fetches and compiles the 1inch [CumulativeMerkleDrop]((https://github
 ## TODOs
  - [ ] NPM private package, so that users don't have to clone the repository.
  - [ ] Improve logging (output to file, etc.)
- - [ ] Auto verification of the deployed contract on Etherscan.
  - [ ] Add unit tests.
  - [ ] CHANGELOG.md
